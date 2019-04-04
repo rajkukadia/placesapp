@@ -1,16 +1,15 @@
- .title{
+
+.title{
     font-family: 'Pacifico', cursive;
 }
  .curr-loc{
-     font-family: 'Dancing Script', cursive;
-     font-size: larger;
+     font-family: 'Bree Serif', serif;
  }
+
  .fa fa-star{
      content:"\f005";
  }
- .progress-bar bg-success{
-     width:0;
- }
+
  .addr{
      color: dodgerblue;
  }

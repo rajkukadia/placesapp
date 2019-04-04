@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Places App</title>
@@ -9,15 +9,23 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkngvP8JqiYNJyZLgzLrftXylkv9ZDIrQ&libraries=places"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/geocode/json?address=Winnetka&key=AIzaSyDkngvP8JqiYNJyZLgzLrftXylkv9ZDIrQ"></script>
     <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Dancing+Script" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Bree+Serif" rel="stylesheet">
     <style>
         #map {
             height: 200px;
             width: 100%;
+        }
+        #pbar{
+            background-color: white;
+        }
+        #pgbar{
+            display: none;
         }
     </style>
 </head>
@@ -44,7 +52,7 @@
                     </div>
 
                     <div class="col-lg-4 col-sm-3">
-                        <input id="locationText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Location">
+                        <input id="locationText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Location" onclick="typingLocation()" oninput="typingLocation()">
                     </div>
                     <!--end of col-->
                     <div class="col-lg-2 col-sm-3">
@@ -58,23 +66,29 @@
     </div>
     <br>
     <div class="parent row justify-content-center">
-        <div class="child inline-block-child">
+        <div class="child inline-block-child col-auto">
             <span id='counter' class="badge badge-lg badge-pill badge-warning"></span>
         </div>
-<!--        <div class="child inline-block-child">-->
-<!--            <div class="checkboxDiv">-->
-<!--                <input type="checkbox" value="1" id="checkboxD" name="" />-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="child inline-block-child">-->
-<!--            <label class="curr-loc">Use current location</label>-->
-<!--        </div>-->
+        <br>
+        <div class="child inline-block-child col-auto">
+            <div class="pretty p-switch p-fill">
+                <input id="myCheck" type="checkbox" name="checkbox" />
+                <div class="state p-warning">
+                    <label class="curr-loc">Use current location</label>
+                </div>
+            </div>
+        </div>
     </div>
     <br>
-<!--    <div class="progress">-->
-<!--        <div id="pgbar" class="progress-bar bg-success">-->
-<!--        </div>-->
-<!--    </div>-->
+    <div  class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-10">
+    <div id="pbar" class="progress"  >
+        <div id="pgbar" class="progress-bar bg-success"  style="width:0%">
+        </div>
+    </div>
+    </div>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-10">
         <div id="map" class="border border-warning map-border"></div>
@@ -93,93 +107,174 @@
         let service;
         let geocoder = new google.maps.Geocoder();
         let loc;
+        let width;
 
-        function initialize(queryVal, address) {
-            geocoder.geocode( {address:address}, function(results, status){
-                if (status == google.maps.GeocoderStatus.OK){
+        function initialize(queryVal, address, lat , lng) {
+            document.getElementById("pgbar").style.display = "block";
+            document.getElementById("pgbar").style.width = '10%';
+            width = 10;
+
+            if(address) {
+                geocoder.geocode({address: address}, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
                         console.log(results);
-                       loc = new google.maps.LatLng(results[0].geometry.location.lat(),results[0].geometry.location.lng());
+                        loc = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
                         map = new google.maps.Map(document.getElementById('map'), {
-                        center: loc,
-                        zoom: 15
-                    });
-                    let request = {
-                        location: loc,
-                        radius: '500',
-                        query: queryVal
-                    };
+                            center: loc,
+                            zoom: 15
+                        });
+                        let request = {
+                            location: loc,
+                            radius: '500',
+                            query: queryVal
+                        };
 
-                    service = new google.maps.places.PlacesService(map);
-                    service.textSearch(request, callback);
-                    console.log("search req made");
-                }else{
-                    console.log('error occurred');
-                }
-                    });
+                        service = new google.maps.places.PlacesService(map);
+                        service.textSearch(request, callback);
+                        console.log("search req made");
+                    } else {
+                        console.log('error occurred');
+                    }
+                });
+            }
+            if(!address){
+                loc = new google.maps.LatLng(lat, lng);
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: loc,
+                    zoom: 10
+                });
+                let request = {
+                    location: loc,
+                    radius: '500',
+                    query: queryVal
+                };
+
+                service = new google.maps.places.PlacesService(map);
+                service.textSearch(request, callback);
+            }
         }
 
         function callback(results, status) {
             $('.list-group').empty();
             var counter = 0;
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-                for (var i = 0; i < results.length; i++) {
-                    var place = results[i];
-                    console.log(results[i]);
-                    createMarker(results[i]);
-                    counter = counter+1;
-                    document.getElementById("map").style.display = "block";
-                    document.getElementById("counter").textContent=counter+" places found";
-                    $('.list-group').append("<div class=\"row justify-content-center\">\n" +
-                        "    <div class=\"col-12 col-md-10 col-lg-10\">\n" +
-                        "        <div class=\"card card-sm border border-warning\">\n" +
-                        "            <div class=\"card-body row align-items-center\">\n" +
-                        "                <div class=\"col\">\n" +
-                        "      <img class=\" img-responsive img-thumbnail\" width=\"250\" height=\"150\" src="+results[i].photos[0].getUrl()+">\n" +
-                        "    </div>\n" +
-                        "                <div class=\"col\">\n" +
-                        "    <Button type=\"button\" class=\"btn btn-lg btn-outline-danger list-group-item list-group-item-action flex-column align-items-start\" >\n" +
-                        "        <div class=\"d-flex w-100 justify-content-between\">\n" +
-                        "            <h5 class=\"mb-1 addr\">"+results[i].name+"</h5>\n" +
-                        "            <small></small>\n" +
-                        "        </div>\n" +
-                        "        <p class=\"mb-1\">"+results[i].formatted_address+"</p>\n" +
-                        "        <span  class=\"badge badge-danger fa fa-star\"><small> "+results[i].rating+"</small></span>\n" +
-                        "    </Button>\n" +
-                        "</div>\n" +
-                        "            </div>\n" +
-                        "        </div>\n" +
-                        "    </div>\n" +
-                        "</div> <br>");
+            try {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                    for (var i = 0; i < results.length; i++) {
+                        var progress = (i / results.length * 100) + (width);
+                        if (progress <= 100) {
+                            console.log(progress);
+                            document.getElementById("pgbar").style.width = progress + '%';
+                            width = (i / results.length * 100) + width;
+                        } else {
+                            document.getElementById("pgbar").style.width = '100%';
+                        }
+                        var place = results[i];
+                        console.log(results[i]);
+                        createMarker(results[i]);
+                        counter = counter + 1;
+                        document.getElementById("map").style.display = "block";
+                        document.getElementById("counter").textContent = counter + " places found";
+                        $('.list-group').append("<div class=\"row justify-content-center\">\n" +
+                            "    <div class=\"col-12 col-md-10 col-lg-10\">\n" +
+                            "        <div class=\"card card-sm border border-warning\">\n" +
+                            "            <div class=\"card-body row align-items-center\">\n" +
+                            "                <div class=\"col\">\n" +
+                            "      <img class=\" img-responsive img-thumbnail\" width=\"250\" height=\"150\" src=" + results[i].photos[0].getUrl() + ">\n" +
+                            "    </div>\n" +
+                            "                <div class=\"col\">\n" +
+                            "    <Button type=\"button\" class=\"btn btn-lg btn-outline-danger list-group-item list-group-item-action flex-column align-items-start\" >\n" +
+                            "        <div class=\"d-flex w-100 justify-content-between\">\n" +
+                            "            <h5 class=\"mb-1 addr\">" + results[i].name + "</h5>\n" +
+                            "            <small></small>\n" +
+                            "        </div>\n" +
+                            "        <p class=\"mb-1\">" + results[i].formatted_address + "</p>\n" +
+                            "        <span  class=\"badge badge-danger fa fa-star\"><small> " + results[i].rating + "</small></span>\n" +
+                            "    </Button>\n" +
+                            "</div>\n" +
+                            "            </div>\n" +
+                            "        </div>\n" +
+                            "    </div>\n" +
+                            "</div> <br>");
+                    }
                 }
             }
+            catch (e) {
+                document.getElementById("pgbar").style.width = '100%';
+            }
         }
+        // document.getElementById('oneitem').onclick = function zoom(){
+            //     // var loc = {lat: lat, lng: lng};
+            //     console.log('clicked');
+            //     var map = new google.maps.Map(document.getElementById('map'), {
+            //         zoom: 13,
+            //         center: loc,
+            //         gestureHandling: 'cooperative'
+            //     });
+            //     var marker = new google.maps.Marker({
+            //         position: loc,
+            //         map: map,
+            //         title: 'Hello World!'
+            //     });
+            //
+            // };
 
-        function zoom(lat, lng){
-            var loc = {lat: lat, lng: lng};
-            var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 13,
-                center: loc,
-                gestureHandling: 'cooperative'
-            });
-            var marker = new google.maps.Marker({
-                position: loc,
-                map: map,
-                title: 'Hello World!'
-            });
-
-        }
 
         function createMarker(results){
             var pos = {lat: results.geometry.location.lat(), lng: results.geometry.location.lng()};
             var marker = new google.maps.Marker({position:pos, map: map });
         }
 
-        function query(){
-            let val = document.getElementById('queryText').value;
-            let address = document.getElementById("locationText").value;
-            initialize(val, address);
+        function query(lat, lng){
+                    let val = document.getElementById('queryText').value;
+                    let address = document.getElementById("locationText").value;
+                    if(lat){
+                        document.getElementById("locationText").value = "Current Location";
+                        document.getElementById("locationText").style.color="blue";
+                        address = "";
+                    }
+                    if(address === "Current Location" && !lat){
+                        if (navigator.geolocation) {
+                            document.getElementById("myCheck").checked = true;
+                            navigator.geolocation.getCurrentPosition(getPosition);
+                        }
+                    }
+                    initialize(val, address, lat, lng);
         }
     </script>
+
+    <script>
+        $('input[name=checkbox]').change(function(){
+            if($(this).is(':checked')) {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(getPosition);
+                } else {
+
+                }
+            } else {
+                document.getElementById("locationText").value = "";
+                document.getElementById("locationText").style.color = "black";
+            }
+        });
+
+        function getPosition(position) {
+            query(position.coords.latitude, position.coords.longitude);
+        }
+
+        // function toggleProgressBar(){
+        //     var x = document.getElementById("pgbar");
+        //     if (x.style.display === 'none') {
+        //         x.style.display = 'block';
+        //     } else {
+        //         x.style.display = 'none';
+        //     }
+        //}
+    </script>
+<script>
+    function typingLocation(){
+        document.getElementById("myCheck").checked = false;
+        document.getElementById("locationText").style.color = "black";
+    }
+</script>
 <!--</div>-->
 </body>
 </html>
