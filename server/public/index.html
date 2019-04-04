@@ -244,12 +244,10 @@
 
     <script>
         $('input[name=checkbox]').change(function(){
-            if($(this).is(':checked')) {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(getPosition);
-                } else {
 
-                }
+
+            if($(this).is(':checked')) {
+               getLocation();
             } else {
                 document.getElementById("locationText").value = "";
                 document.getElementById("locationText").style.color = "black";
@@ -258,6 +256,24 @@
 
         function getPosition(position) {
             query(position.coords.latitude, position.coords.longitude);
+        }
+
+        function getLocation(){
+            var displayError =  function(error) {
+                var errors = {
+                    1: 'Permission denied',
+                    2: 'Position unavailable',
+                    3: 'Request timeout'
+                };
+                alert("Error: " + errors[error.code]);
+            };
+            if (navigator.geolocation) {
+                var timeoutVal = 10 * 1000 * 1000;
+                navigator.geolocation.getCurrentPosition(getPosition, displayError,{ enableHighAccuracy: true, timeout: timeoutVal, maximumAge: 0}
+                );
+            } else {
+                alert("Geolocation is not supported by this browser");
+            }
         }
 
         // function toggleProgressBar(){
