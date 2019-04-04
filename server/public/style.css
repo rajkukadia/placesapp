@@ -7,6 +7,9 @@
  .progress-bar bg-success{
      width:0;
  }
+ .addr{
+     color: dodgerblue;
+ }
  .map-border{
      display: none;
  }
@@ -19,4 +22,9 @@
     outline: none;
     box-shadow: none;
 }
+
+ .card{
+     width:100%;
+     height:auto;
+ }
 

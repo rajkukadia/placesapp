@@ -39,11 +39,11 @@
                     </div>
                     <!--end of col-->
                     <div class="col">
-                        <input id="queryText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Search places...">
+                        <input id="queryText" class="border border-danger form-control form-control-sm form-control-lg form-control-borderless" type="search" placeholder="Search places...">
                     </div>
 
                     <div class="col">
-                        <input id="locationText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Location">
+                        <input id="locationText" class="border border-danger form-control form-control-lg form-control-sm form-control-borderless" type="search" placeholder="Location">
                     </div>
                     <!--end of col-->
                     <div class="col-auto">
@@ -125,17 +125,17 @@
                         "        <div class=\"card card-sm border border-warning\">\n" +
                         "            <div class=\"card-body row align-items-center\">\n" +
                         "                <div class=\"col\">\n" +
-                        "      <img class=\"border border-danger img-responsive\" width=\"250\" height=\"150\" src="+results[i].photos[0].getUrl()+">\n" +
+                        "      <img class=\" img-responsive img-thumbnail\" width=\"250\" height=\"150\" src="+results[i].photos[0].getUrl()+">\n" +
                         "    </div>\n" +
                         "                <div class=\"col\">\n" +
-                        "    <a href=\"#\" class=\"border border-danger  list-group-item list-group-item-action flex-column align-items-start\">\n" +
+                        "    <Button type=\"button\" class=\" btn btn-lg btn-outline-danger list-group-item list-group-item-action flex-column align-items-start\" >\n" +
                         "        <div class=\"d-flex w-100 justify-content-between\">\n" +
-                        "            <h5 class=\"mb-1\">"+results[i].name+"</h5>\n" +
-                        "            <small>3 days ago</small>\n" +
+                        "            <h5 class=\"mb-1 addr\">"+results[i].name+"</h5>\n" +
+                        "            <small></small>\n" +
                         "        </div>\n" +
                         "        <p class=\"mb-1\">"+results[i].formatted_address+"</p>\n" +
                         "        <span  class=\"badge badge-danger fa fa-star\"><small> "+results[i].rating+"</small></span>\n" +
-                        "    </a>\n" +
+                        "    </Button>\n" +
                         "</div>\n" +
                         "            </div>\n" +
                         "        </div>\n" +
@@ -144,6 +144,22 @@
                 }
             }
         }
+
+        function zoom(lat, lng){
+            var loc = {lat: lat, lng: lng};
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: loc,
+                gestureHandling: 'cooperative'
+            });
+            var marker = new google.maps.Marker({
+                position: loc,
+                map: map,
+                title: 'Hello World!'
+            });
+
+        }
+
         function createMarker(results){
             var pos = {lat: results.geometry.location.lat(), lng: results.geometry.location.lng()};
             var marker = new google.maps.Marker({position:pos, map: map });
@@ -180,4 +196,5 @@
 <!--        </div>-->
 <!--    </div>-->
 <!--</div>
+<!-onclick="+zoom(+results[i].geometry.location.lat(), results[i].geometry.location.lng())+"-->
 
