@@ -110,43 +110,47 @@
         let loc;
         let width;
         function initialize(queryVal, address, lat , lng) {
-            document.getElementById("pgbar").style.display = "block";
-            document.getElementById("pgbar").style.width = '10%';
-            width = 10;
-            if(address) {
-                geocoder.geocode({address: address}, function (results, status) {
-                    if (status == google.maps.GeocoderStatus.OK) {
-                        loc = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
-                        map = new google.maps.Map(document.getElementById('map'), {
-                            center: loc,
-                            zoom: 15
-                        });
-                        let request = {
-                            location: loc,
-                            radius: '500',
-                            query: queryVal
-                        };
-                        service = new google.maps.places.PlacesService(map);
-                        service.textSearch(request, callback);
-                    } else {
-                        document.getElementById("message_alert").style.display = "block";
-                    }
-                });
-            }
-            if(!address){
-                loc = new google.maps.LatLng(lat, lng);
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: loc,
-                    zoom: 10
-                });
-                let request = {
-                    location: loc,
-                    radius: '500',
-                    query: queryVal
-                };
+            if(queryVal) {
+                document.getElementById("pgbar").style.display = "block";
+                document.getElementById("pgbar").style.width = '10%';
+                width = 10;
+                if (address) {
+                    geocoder.geocode({address: address}, function (results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            loc = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+                            map = new google.maps.Map(document.getElementById('map'), {
+                                center: loc,
+                                zoom: 15
+                            });
+                            let request = {
+                                location: loc,
+                                radius: '500',
+                                query: queryVal
+                            };
+                            service = new google.maps.places.PlacesService(map);
+                            service.textSearch(request, callback);
+                        } else {
+                            document.getElementById("message_alert").style.display = "block";
+                        }
+                    });
+                }
+                if (!address) {
+                    loc = new google.maps.LatLng(lat, lng);
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        center: loc,
+                        zoom: 10
+                    });
+                    let request = {
+                        location: loc,
+                        radius: '500',
+                        query: queryVal
+                    };
 
-                service = new google.maps.places.PlacesService(map);
-                service.textSearch(request, callback);
+                    service = new google.maps.places.PlacesService(map);
+                    service.textSearch(request, callback);
+                }
+            }else{
+                document.getElementById("message_alert").style.display = "block";
             }
         }
         function callback(results, status)  {
@@ -245,8 +249,9 @@
                     document.getElementById("myCheck").checked = true;
                     navigator.geolocation.getCurrentPosition(getPosition);
                 }
+            }else {
+                initialize(val, address, lat, lng);
             }
-            initialize(val, address, lat, lng);
         }
     </script>
     <script>
