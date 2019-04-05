@@ -155,7 +155,7 @@
         }
         function callback(results, status)  {
             $('.list-group').empty();
-            let counter = 0;
+            let counter = -1;
             try {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
                     for (let i = 0; i < results.length; i++) {
