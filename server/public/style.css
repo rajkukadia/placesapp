@@ -21,3 +21,36 @@
     outline: none;
     box-shadow: none;
 }
+.autocomplete {
+    position: relative;
+    display: inline-block;
+}
+
+.autocomplete-items {
+    position: absolute;
+    border: 1px solid darkred;
+    border-bottom: 1px solid darkred;
+    border-top: 1px solid darkred;
+    z-index: 99;
+    top: 100%;
+    left: 0;
+    right: 0;
+}
+
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid darkred;
+}
+
+/*when hovering an item:*/
+.autocomplete-items div:hover {
+    background-color: #ffc107;
+}
+
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+    background-color: #ffc107 !important;
+    color: #ffffff;
+}

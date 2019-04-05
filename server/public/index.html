@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Dancing+Script" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Bree+Serif" rel="stylesheet">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <style>
         #map {
             height: 200px;
@@ -52,8 +53,8 @@
                     <div class="col-lg-5 col-sm-3">
                         <input id="queryText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Search places..." onclick="typingPlace()" oninput="typingPlace()">
                     </div>
-                    <div class="col-lg-4 col-sm-3">
-                        <input id="locationText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Location" onclick="typingLocation()" oninput="typingLocation()">
+                    <div class="col-lg-4 col-sm-3 autocomplete">
+                        <input id="locationText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Location" oninput="typingLocation()">
                     </div>
                     <div class="col-lg-2 col-sm-3">
                         <button class="btn btn-lg btn-outline-info" onClick="query()">Search</button>
@@ -263,11 +264,9 @@
                 document.getElementById("locationText").style.color = "black";
             }
         });
-
         function getPosition(position) {
             query(position.coords.latitude, position.coords.longitude);
         }
-
         function getLocation(){
             var displayError =  function(error) {
                 var errors = {
@@ -285,7 +284,6 @@
                 alert("Geolocation is not supported by this browser");
             }
         }
-
         function setEventListener(){
            let  list =  document.getElementById("list");
             let items = list.getElementsByClassName("list-group-item");
@@ -302,11 +300,101 @@
             document.getElementById("myCheck").checked = false;
             document.getElementById("locationText").style.color = "black";
             document.getElementById("message_alert").style.display = "none";
+            getPredictedValues(document.getElementById("locationText").value);
         }
         function typingPlace(){
             document.getElementById("message_alert").style.display = "none";
         }
     </script>
+    <script>
+        function getPredictedValues(addr){
+            const url = "http://localhost:3000/getvalues";
+            axios.get(url, {
+                params: {
+                    address: addr
+                }
+            })
+                .then(function(resp){
+                    autocomplete(document.getElementById("locationText"),resp.data.predictions);
+                })
+                .catch(function(err){
+
+                })
+                .then(function () {
+                    
+                });
+        }
+    </script>
+<script>
+    function autocomplete(inp, arr) {
+        var currentFocus = -1;
+        inp.addEventListener("input", function(e) {
+            var a, b, i, val = this.value;
+            closeAllLists();
+            if (!val) { return false;}
+            currentFocus = -1;
+            a = document.createElement("DIV");
+            a.setAttribute("id", this.id + "autocomplete-list");
+            a.setAttribute("class", "autocomplete-items");
+            this.parentNode.appendChild(a);
+            for (i = 0; i < arr.length; i++) {
+                if (arr[i].description.substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                    b = document.createElement("DIV");
+                    b.innerHTML = "<strong>" + arr[i].description.substr(0, val.length) + "</strong>";
+                    b.innerHTML += arr[i].description.substr(val.length);
+                    b.innerHTML += "<input type='hidden' value='" + arr[i].description + "'>";
+                    b.addEventListener("click", function(e) {
+                        inp.value = this.getElementsByTagName("input")[0].value;
+                        closeAllLists();
+                    });
+                    a.appendChild(b);
+                }
+            }
+        });
+        inp.addEventListener("keydown", function(e) {
+          var x = document.getElementById(this.id + "autocomplete-list");
+
+            if (x) x = x.getElementsByTagName("div");
+
+            if (e.keyCode == 40) {
+                currentFocus++;
+                addActive(x);
+            } else if (e.keyCode == 38) {
+                currentFocus--;
+                addActive(x);
+            } else if (e.keyCode == 13) {
+                e.preventDefault();
+                if (currentFocus > -1) {
+                    if (x) x[currentFocus].click();
+                }
+            }
+        });
+        function addActive(x) {
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            if(!isNaN(currentFocus))x[currentFocus].classList.add("autocomplete-active");
+
+        }
+        function removeActive(x) {
+            for (var i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+        }
+        function closeAllLists(elmnt) {
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != inp) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+</script>
 </body>
 </html>
 
