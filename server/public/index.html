@@ -194,11 +194,11 @@
                             "        </div>\n" +
                             "    </div>\n" +
                             "</div> <br>");
+                        setEventListener();
                         if(openNow === "Closed") {
                             document.getElementById("open"+i).className = document.getElementById("open"+i).className.replace("badge badge-success","badge badge-danger");
                         }
                     }
-                    setEventListener();
                 }else{
                     document.getElementById("message_alert").style.display = "block";
                 }
@@ -283,7 +283,7 @@
 
         function setEventListener(){
            let  list =  document.getElementById("list");
-           let items = list.getElementsByClassName("list-group-item");
+            let items = list.getElementsByClassName("list-group-item");
             for (let i = 0; i < items.length; i++) {
                     items[i].addEventListener("click", function(){
                         let insideItems = items[i].getElementsByClassName("mb-1");
