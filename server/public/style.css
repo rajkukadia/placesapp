@@ -1,15 +1,12 @@
-
 .title{
     font-family: 'Pacifico', cursive;
 }
  .curr-loc{
      font-family: 'Bree Serif', serif;
  }
-
  .fa fa-star{
      content:"\f005";
  }
-
  .addr{
      color: dodgerblue;
  }
@@ -18,9 +15,7 @@
  }
 .form-control-borderless {
     border: none;
-
 }
-
 .form-control-borderless:hover, .form-control-borderless:active, .form-control-borderless:focus {
     border: none;
     outline: none;

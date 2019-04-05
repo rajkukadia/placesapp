@@ -9,7 +9,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkngvP8JqiYNJyZLgzLrftXylkv9ZDIrQ&libraries=places"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/geocode/json?address=Winnetka&key=AIzaSyDkngvP8JqiYNJyZLgzLrftXylkv9ZDIrQ"></script>
@@ -22,9 +22,12 @@
             width: 100%;
         }
         #pbar{
-            background-color: white;
+            background-color: #ffc107 ;
         }
         #pgbar{
+            display: none;
+        }
+        #message_alert{
             display: none;
         }
     </style>
@@ -46,19 +49,15 @@
                     <div class="col-lg-1 col-sm-3">
                         <i class="fas fa-search h4 text-body"></i>
                     </div>
-                    <!--end of col-->
                     <div class="col-lg-5 col-sm-3">
-                        <input id="queryText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Search places...">
+                        <input id="queryText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Search places..." onclick="typingPlace()" oninput="typingPlace()">
                     </div>
-
                     <div class="col-lg-4 col-sm-3">
                         <input id="locationText" class="border border-danger form-control form-control-lg form-control-borderless" type="search" placeholder="Location" onclick="typingLocation()" oninput="typingLocation()">
                     </div>
-                    <!--end of col-->
                     <div class="col-lg-2 col-sm-3">
                         <button class="btn btn-lg btn-outline-info" onClick="query()">Search</button>
                     </div>
-                    <!--end of col-->
                 </div>
             </div>
         </div>
@@ -80,6 +79,9 @@
         </div>
     </div>
     <br>
+    <div id="message_alert" class="alert alert-danger alert-dismissible">
+        <strong>Sorry, invalid input!</strong> Please use one word search in the 'Search places' field and a valid location.
+    </div>
     <div  class="row justify-content-center">
     <div class="col-12 col-md-10 col-lg-10">
     <div id="pbar" class="progress"  >
@@ -88,7 +90,6 @@
     </div>
     </div>
     </div>
-
     <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-10">
         <div id="map" class="border border-warning map-border"></div>
@@ -97,7 +98,7 @@
     <br>
      <div class="row justify-content-center">
          <div class="col-12 col-md-10 col-lg-10">
-             <ul class="list-group">
+             <ul id="list" class="list-group">
              </ul>
          </div>
       </div>
@@ -108,16 +109,13 @@
         let geocoder = new google.maps.Geocoder();
         let loc;
         let width;
-
         function initialize(queryVal, address, lat , lng) {
             document.getElementById("pgbar").style.display = "block";
             document.getElementById("pgbar").style.width = '10%';
             width = 10;
-
             if(address) {
                 geocoder.geocode({address: address}, function (results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
-                        console.log(results);
                         loc = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
                         map = new google.maps.Map(document.getElementById('map'), {
                             center: loc,
@@ -128,12 +126,10 @@
                             radius: '500',
                             query: queryVal
                         };
-
                         service = new google.maps.places.PlacesService(map);
                         service.textSearch(request, callback);
-                        console.log("search req made");
                     } else {
-                        console.log('error occurred');
+                        document.getElementById("message_alert").style.display = "block";
                     }
                 });
             }
@@ -153,27 +149,30 @@
                 service.textSearch(request, callback);
             }
         }
-
-        function callback(results, status) {
+        function callback(results, status)  {
             $('.list-group').empty();
-            var counter = 0;
+            let counter = 0;
             try {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
-                    for (var i = 0; i < results.length; i++) {
-                        var progress = (i / results.length * 100) + (width);
+                    for (let i = 0; i < results.length; i++) {
+                        let progress = (i / results.length * 100) + (width);
                         if (progress <= 100) {
-                            console.log(progress);
                             document.getElementById("pgbar").style.width = progress + '%';
                             width = (i / results.length * 100) + width;
                         } else {
                             document.getElementById("pgbar").style.width = '100%';
                         }
-                        var place = results[i];
-                        console.log(results[i]);
+                        let place = results[i];
+                        let openNow = "";
                         createMarker(results[i]);
                         counter = counter + 1;
                         document.getElementById("map").style.display = "block";
                         document.getElementById("counter").textContent = counter + " places found";
+                        if(results[i].opening_hours.open_now){
+                              openNow = "Open";
+                        }else{
+                            openNow = "Closed";
+                        }
                         $('.list-group').append("<div class=\"row justify-content-center\">\n" +
                             "    <div class=\"col-12 col-md-10 col-lg-10\">\n" +
                             "        <div class=\"card card-sm border border-warning\">\n" +
@@ -182,70 +181,76 @@
                             "      <img class=\" img-responsive img-thumbnail\" width=\"250\" height=\"150\" src=" + results[i].photos[0].getUrl() + ">\n" +
                             "    </div>\n" +
                             "                <div class=\"col\">\n" +
-                            "    <Button type=\"button\" class=\"btn btn-lg btn-outline-danger list-group-item list-group-item-action flex-column align-items-start\" >\n" +
+                            "    <Button type=\"button\" class=\"btn btn-lg btn-outline-danger list-group-item list-group-item-action flex-column align-items-start\">\n" +
                             "        <div class=\"d-flex w-100 justify-content-between\">\n" +
                             "            <h5 class=\"mb-1 addr\">" + results[i].name + "</h5>\n" +
                             "            <small></small>\n" +
                             "        </div>\n" +
                             "        <p class=\"mb-1\">" + results[i].formatted_address + "</p>\n" +
-                            "        <span  class=\"badge badge-danger fa fa-star\"><small> " + results[i].rating + "</small></span>\n" +
+                            "        <span  class=\"badge badge-danger fa fa-star\"><small> " + results[i].rating + "</small></span> <span id=\"open"+i+"\" class=\"badge badge-success\"> <small> " + openNow+ "</small></span></span>\n" +
                             "    </Button>\n" +
                             "</div>\n" +
                             "            </div>\n" +
                             "        </div>\n" +
                             "    </div>\n" +
                             "</div> <br>");
+                        if(openNow === "Closed") {
+                            document.getElementById("open"+i).className = document.getElementById("open"+i).className.replace("badge badge-success","badge badge-danger");
+                        }
                     }
+                    setEventListener();
+                }else{
+                    document.getElementById("message_alert").style.display = "block";
                 }
             }
             catch (e) {
                 document.getElementById("pgbar").style.width = '100%';
             }
         }
-        // document.getElementById('oneitem').onclick = function zoom(){
-            //     // var loc = {lat: lat, lng: lng};
-            //     console.log('clicked');
-            //     var map = new google.maps.Map(document.getElementById('map'), {
-            //         zoom: 13,
-            //         center: loc,
-            //         gestureHandling: 'cooperative'
-            //     });
-            //     var marker = new google.maps.Marker({
-            //         position: loc,
-            //         map: map,
-            //         title: 'Hello World!'
-            //     });
-            //
-            // };
+        function zoom(add){
+            let loc;
+            geocoder.geocode({address: add}, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    loc = new google.maps.LatLng(results[0].geometry.location.lat(),results[0].geometry.location.lng());
+                    let map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 20,
+                        center: loc,
+                        gestureHandling: 'cooperative'
+                    });
+                    let marker = new google.maps.Marker({
+                        position: loc,
+                        map: map,
+                        title: add
+                    });
+                    document.getElementById('map').scrollIntoView();
+                }else{
 
-
+                }
+                });
+            }
         function createMarker(results){
-            var pos = {lat: results.geometry.location.lat(), lng: results.geometry.location.lng()};
-            var marker = new google.maps.Marker({position:pos, map: map });
+            let pos = {lat: results.geometry.location.lat(), lng: results.geometry.location.lng()};
+            let marker = new google.maps.Marker({position:pos, map: map });
         }
-
         function query(lat, lng){
-                    let val = document.getElementById('queryText').value;
-                    let address = document.getElementById("locationText").value;
-                    if(lat){
-                        document.getElementById("locationText").value = "Current Location";
-                        document.getElementById("locationText").style.color="blue";
-                        address = "";
-                    }
-                    if(address === "Current Location" && !lat){
-                        if (navigator.geolocation) {
-                            document.getElementById("myCheck").checked = true;
-                            navigator.geolocation.getCurrentPosition(getPosition);
-                        }
-                    }
-                    initialize(val, address, lat, lng);
+            let val = document.getElementById('queryText').value;
+            let address = document.getElementById("locationText").value;
+            if(lat){
+                document.getElementById("locationText").value = "Current Location";
+                document.getElementById("locationText").style.color="blue";
+                address = "";
+            }
+            if(address === "Current Location" && !lat){
+                if (navigator.geolocation) {
+                    document.getElementById("myCheck").checked = true;
+                    navigator.geolocation.getCurrentPosition(getPosition);
+                }
+            }
+            initialize(val, address, lat, lng);
         }
     </script>
-
     <script>
         $('input[name=checkbox]').change(function(){
-
-
             if($(this).is(':checked')) {
                getLocation();
             } else {
@@ -276,22 +281,27 @@
             }
         }
 
-        // function toggleProgressBar(){
-        //     var x = document.getElementById("pgbar");
-        //     if (x.style.display === 'none') {
-        //         x.style.display = 'block';
-        //     } else {
-        //         x.style.display = 'none';
-        //     }
-        //}
+        function setEventListener(){
+           let  list =  document.getElementById("list");
+           let items = list.getElementsByClassName("list-group-item");
+            for (let i = 0; i < items.length; i++) {
+                    items[i].addEventListener("click", function(){
+                        let insideItems = items[i].getElementsByClassName("mb-1");
+                        zoom(insideItems[1].innerHTML);
+                });
+            }
+            }
     </script>
-<script>
-    function typingLocation(){
-        document.getElementById("myCheck").checked = false;
-        document.getElementById("locationText").style.color = "black";
-    }
-</script>
-<!--</div>-->
+    <script>
+        function typingLocation(){
+            document.getElementById("myCheck").checked = false;
+            document.getElementById("locationText").style.color = "black";
+            document.getElementById("message_alert").style.display = "none";
+        }
+        function typingPlace(){
+            document.getElementById("message_alert").style.display = "none";
+        }
+    </script>
 </body>
 </html>
 
