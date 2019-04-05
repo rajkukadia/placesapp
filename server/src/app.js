@@ -5,9 +5,8 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 console.log(path.join(__dirname,'../public'));
-app.use(cors({origin: 'http://localhost:3000'}));
+app.use(cors({origin: 'https://findaplace.herokuapp.com'}));
 app.use(express.static(path.join(__dirname,'../public')));
-
 
 app.get('/', function(req, res){
     res.sendFile(path.join(__dirname, '../public/index.html'));
